@@ -1,8 +1,10 @@
 import React from "react";
 import { Query } from "react-apollo";
 import { MOVIE_DETAILS } from "./queries";
+import { Helmet } from "react-helmet";
 import Movie from "./Movie";
 import styled from "styled-components";
+import { useQuery } from "react-apollo-hooks";
 
 const Container = styled.div`
   display: grid;
@@ -37,14 +39,26 @@ const MovieContainer = styled.div`
   margin-top: 50px;
 `;
 
-const Detail = ({ match: { params: { movieId } } }) => ( // { match }
-  <Query query={MOVIE_DETAILS} variables={{movieId}}>
-    {({ loading, data, error }) => {
-      if (loading) return "loading";
+const Detail = ({ match: { params: { movieId } } }) => { // { match }
+  const { loading, error, data } = useQuery(MOVIE_DETAILS, {
+    variables : { movieId }
+  });
+  // <Query query={ MOVIE_DETAILS } variables={{movieId}}>
+    // {({ loading, data, error }) => {
+      if (loading) return (
+        <React.Fragment>
+          <Helmet>
+            <title>Loading | MovieQL</title>
+          </Helmet>
+        </React.Fragment>
+      );
       if (error) return `something happend ${error.message}`;
       return (
         <React.Fragment>
           <Container>
+            <Helmet>
+              <title>{data.movie.title} | MovieQL </title>
+            </Helmet>
             <Image src={data.movie.medium_cover_image} />
             <span>
               <Title>{data.movie.title}</Title>
@@ -62,13 +76,13 @@ const Detail = ({ match: { params: { movieId } } }) => ( // { match }
                 rating={movie.rating}
                 poster={movie.medium_cover_image}
               />
-            ))};
+            ))}
           </MovieContainer>
         </React.Fragment>
       );
-    }}
-  </Query>
+    // }}
+  // </Query>
   
-);
+};
 
 export default Detail;
